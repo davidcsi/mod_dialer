@@ -28,7 +28,7 @@
  *
  *
  * mod_dialer.c -- Framework Demo Module
- *
+ * created by david.villasmil.work@gmail.com
  *
  *
  *
