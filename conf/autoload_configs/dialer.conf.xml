@@ -1,0 +1,118 @@
+<configuration name="dialer.conf" description="Dialer Configuation">
+<settings>
+  <param name="odbc-dsn" value="freeswitch:root:dv092171"/>
+  <param name="dbname" value="freeswitch"/>
+</settings>
+<campaigns>
+    <campaign name="test_campaign">
+        <param name="datetime_start" value=""/>
+        <param name="dialplan_type" value="XML"/>
+        <param name="context" value="default"/>
+        <param name="profile/gateway" value="creacomm"/>
+
+        <param name="add_custom_header_name" value="sip_h_P-Campaing-Name"/>
+        <param name="add_custom_header_value" value="my_campaign"/>
+
+        <param name="max_concurrent_calls" value="2"/>
+        <param name="time_between_calls" value="1"/>
+        <param name="attempts_per_number" value="1"/>
+        <param name="time_between_retries" value="3600"/>
+
+        <!--
+             Enable Gaussian distribution? If so, you need to provide the "mean" and the
+             standard deviation.
+
+             If Gaussian distrib is enabled, call_max_duration, call_min_duration and any duration
+             value in the destination_list will be ignored
+         -->
+        <param name="gaussian_distribution" value="1"/>
+        <param name="gaussian_distribution_mean" value="30"/>
+        <param name="gaussian_distribution_stdv" value="10"/>
+
+        <!--
+            If Gaussian distribution is diabled, and there is a duration in the destination_list's
+            'duration' field for the numbers, said duration will be used.
+            If the duration in the destination_list is 0 or NULL, then we will generate a
+            random number between 'call_min_duration' and 'max_call_duration' and this number
+            will be used as the duration
+         -->
+        <param name="call_max_duration" value="60"/>
+        <param name="call_min_duration" value="20"/>
+        <param name="originate_timeout" value="30"/>
+        <param name="cancel_ratio" value="50"/>
+
+        <!-- If the number row's field 'callerid' is empty, we will use the following as callerid -->
+        <param name="global_caller_id" value="+34669448337"/>
+
+        <!-- The table in MySQL (via odbc in the core) from where to get the numbers to call -->
+        <param name="destination_list" value="callout_list"/>
+        <param name="codec_list" value="PCMA,PCMU,OPUS"/>
+        <param name="calling_strategy" value="sequential"/>
+        <param name="action_on_anwser" value="echo()"/>
+        <param name="transfer_on_answer" value="8888"/>
+        <!--
+            End the campaign on:
+                -1: When all numbers in the destination_list have been called
+                0: Never
+                n: After making n calls
+        -->
+        <param name="finish_on" value="10"/>
+
+    </campaign>
+
+    <campaign name="my_campaign">
+        <param name="datetime_start" value=""/>
+        <param name="dialplan_type" value="XML"/>
+        <param name="context" value="default"/>
+        <param name="profile/gateway" value="creacomm"/>
+        <param name="add_custom_header_name" value=""/>
+        <param name="add_custom_header_value" value=""/>
+        <param name="max_concurrent_calls" value="2"/>
+        <param name="time_between_calls" value="1"/>
+        <param name="attempts_per_number" value="1"/>
+        <param name="time_between_retries" value="3600"/>
+
+        <!--
+             Enable Gaussian distribution? If so, you need to provide the "mean" and the
+             standard deviation.
+
+             If Gaussian distrib is enabled, call_max_duration, call_min_duration and any duration
+             value in the destination_list will be ignored
+         -->
+        <param name="gaussian_distribution" value=""/>
+        <param name="gaussian_distribution_mean" value=""/>
+        <param name="gaussian_distribution_stdv" value=""/>
+
+        <!--
+            If Gaussian distribution is diabled, and there is a duration in the destination_list's
+            'duration' field for the numbers, said duration will be used.
+            If the duration in the destination_list is 0 or NULL, then we will generate a
+            random number between 'call_min_duration' and 'max_call_duration' and this number
+            will be used as the duration
+         -->
+        <param name="call_max_duration" value="60"/>
+        <param name="call_min_duration" value="20"/>
+        <param name="originate_timeout" value="30"/>
+        <param name="cancel_ratio" value="50"/>
+
+        <!-- If the number row's field 'callerid' is empty, we will use the following as callerid -->
+        <param name="global_caller_id" value="+34669448337"/>
+
+        <!-- The table in MySQL (via odbc in the core) from where to get the numbers to call -->
+        <param name="destination_list" value="callout2_list"/>
+        <param name="codec_list" value="PCMA,PCMU,OPUS"/>
+        <param name="calling_strategy" value="sequential"/>
+        <param name="action_on_anwser" value="echo()"/>
+        <param name="transfer_on_answer" value="8888"/>
+
+        <!--
+            End the campaign on:
+                -1: When all numbers in the destination_list have been called
+                0: Never (This means if there are not enough numbers, re-calling the same number)
+                n: After making n calls
+        -->
+        <param name="finish_on" value="10"/>
+    </campaign>
+</campaigns>
+</configuration>
+
