@@ -175,7 +175,7 @@ static void *SWITCH_THREAD_FUNC dialer_start_campaign(switch_thread_t *thread, v
 
     /* sql stuff */
     char sql[1024];
-    int rows_affected = NULL;
+    int rows_affected;
 
 
     switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: start_camapign received index %d\n", campaign_index );
@@ -1229,8 +1229,8 @@ static int dialer_dests_callback(void *pArg, int argc, char **argv, char **colum
 			return 1;
 		}
 
-        if (switch_ivr_originate(NULL, &caller_session, &cause, sql_get_numbers, timeout, NULL, cid_name, cid_num, NULL, NULL, 0, ccause) != SWITCH_STATUS_SUCCESS || !caller_session ) {
-            switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: something went wrong when sending the call, skipping\n");
+        if (switch_ivr_originate(NULL, &caller_session, &cause, sql_get_numbers, timeout, NULL, cid_name, cid_num, NULL, NULL, 0, ccause, NULL) != SWITCH_STATUS_SUCCESS || !caller_session ) {
+        	switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: something went wrong when sending the call, skipping\n");
             dialer_set_number_inuse( campaign_index, number, "0" );
             return 0;
         } else {
