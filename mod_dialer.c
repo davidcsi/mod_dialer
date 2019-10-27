@@ -183,7 +183,7 @@ static void *SWITCH_THREAD_FUNC dialer_start_campaign(switch_thread_t *thread, v
 
     /* We must lock the campaign */
     switch_mutex_lock(globals.mutex);
-switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
+    switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
 
 
     job->running = 1;
@@ -400,22 +400,22 @@ switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals
     sprintf(sql, "select * from %s where in_use = 0 and calls < %d and ( time_to_sec( timediff ( now(), lastcall) ) > %d  or lastcall is NULL ) order by rand() LIMIT 1", job->destination_list, job->attempts_per_number, job->time_between_retries );
     switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: SQL: %s\n", sql );
     switch_mutex_unlock(globals.mutex);
-switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: UN-LOCKING globals.mutex\n");
+    switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: UN-LOCKING globals.mutex\n");
 
 
     while ( job->stop == SWITCH_FALSE ) {
-		switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: curr: %d - max: %d\n", job->current_calls, job->max_concurrent_calls );
+		//switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: curr: %d - max: %d\n", job->current_calls, job->max_concurrent_calls );
 
     	while( job->current_calls < job->max_concurrent_calls && job->stop == SWITCH_FALSE ) {
 			switch_mutex_lock(globals.mutex);
-            switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
+            //switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
 
 			if( job->finish_on > 0 && globals.campaigns[ campaign_index ].calls_made >= job->finish_on ) {
 	            switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: we've reached the amount of calls (%d) stopping now\n", job->finish_on );
 				job->stop = SWITCH_TRUE;
 			}
 
-			switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: Getting next number (%lu secs)...\n", job->time_between_calls );
+			//switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: Getting next number (%lu secs)...\n", job->time_between_calls );
 			if( dialer_execute_sql_callback( NULL, sql, dialer_dests_callback, job->uuid_str ) == SWITCH_FALSE ) {
 				goto end;
 			}
@@ -429,7 +429,7 @@ switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: UN-LOCKING glob
 				switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: We got 0 (ZERO) rows from the table, maybe it's empty?\n" );
 				goto end;
 			} else {
-				switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: affected rows: %d\n", rows_affected );
+				//switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: affected rows: %d\n", rows_affected );
 				switch_mutex_unlock( globals.mutex );
 				switch_yield( job->time_between_calls*1000*1000 );
 			}
@@ -676,6 +676,7 @@ end:
 /* Macro expands to: switch_status_t mod_dialer_load(switch_loadable_module_interface_t **module_interface, switch_memory_pool_t *pool) */
 SWITCH_MODULE_LOAD_FUNCTION(mod_dialer_load)
 {
+
     /* Vars for xml setting loading */
     switch_xml_t cfg = NULL, settings, xml = NULL, param = NULL;
 
@@ -684,6 +685,13 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_dialer_load)
     switch_status_t status = SWITCH_STATUS_SUCCESS;
     memset(&globals, 0, sizeof(globals));
     globals.pool = pool;
+
+    /* Load global settings into global struct - Start*/
+    if (!(xml = switch_xml_open_cfg(global_cf, &cfg, NULL)))
+    {
+        switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: Couldn't load config file\n" );
+        goto end;
+    }
 
     switch_mutex_init(&globals.mutex, SWITCH_MUTEX_NESTED, globals.pool);
 
@@ -718,13 +726,6 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_dialer_load)
         //use_system_commands = 0;
     }
 
-    /* Load global settings into global struct - Start*/
-    if (!(xml = switch_xml_open_cfg(global_cf, &cfg, NULL)))
-    {
-        switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: Couldn't load config file\n" );
-        goto end;
-    }
-
     if ( !(settings = switch_xml_child(cfg, "settings")) ) {
         switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dialer: Couldn't find 'settings' section, exiting\n" );
         status = SWITCH_STATUS_GENERR;
@@ -733,7 +734,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_dialer_load)
         switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_CONSOLE, "dialer: Found 'settings' section\n" );
         /* mutex */
         switch_mutex_lock(globals.mutex);
-switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
+        switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
 
 
         for (param = switch_xml_child(settings, "param"); param; param = param->next) {
@@ -1071,13 +1072,13 @@ static switch_bool_t dialer_execute_sql_callback( switch_mutex_t *mutex, char *s
     char *errmsg = NULL;
     switch_cache_db_handle_t *dbh = NULL;
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: in dialer_execute_sql_callback function\n");
+    //switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: in dialer_execute_sql_callback function\n");
 
     if (mutex) {
         switch_mutex_lock(mutex);
     } else {
         switch_mutex_lock(globals.mutex);
-        switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
+        //switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: LOCKING globals.mutex\n");
     }
 
     if (!(dbh = dialer_get_db_handle())) {
@@ -1102,10 +1103,10 @@ end:
         switch_mutex_unlock(mutex);
     } else {
         switch_mutex_unlock(globals.mutex);
-        switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: UN-LOCKING globals.mutex\n");
+        //switch_log_printf( SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: UN-LOCKING globals.mutex\n");
     }
 
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: going OUT of dialer_execute_sql_callback function\n");
+    //switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "dialer: going OUT of dialer_execute_sql_callback function\n");
     return ret;
 }
 
@@ -1297,7 +1298,7 @@ static switch_bool_t dialer_set_number_inuse( int campaign_index, const char *nu
         goto end;
     }
     
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "update %s set lastcall=NOW(), inuse = 1 where number = '%s';", globals.campaigns[ campaign_index ].destination_list, number );
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "update %s set lastcall=NOW(), in_use = 1 where number = '%s';", globals.campaigns[ campaign_index ].destination_list, number );
     sql_update = switch_mprintf( "update %s set lastcall=NOW(), in_use = %s where number = '%s';", globals.campaigns[ campaign_index ].destination_list, status, number );
     switch_cache_db_execute_sql( dbh, sql_update, &errmsg );
 
@@ -1333,7 +1334,7 @@ static switch_bool_t dialer_increment_number_calls( int campaign_index, const ch
         goto end;
     }
     
-    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "update %s set inuse = 1 where number = '%s';", globals.campaigns[ campaign_index ].destination_list, number );
+    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "update %s set in_use = 1 where number = '%s';", globals.campaigns[ campaign_index ].destination_list, number );
     sql_update = switch_mprintf( "update %s set calls = calls + 1 where number = '%s';", globals.campaigns[ campaign_index ].destination_list, number );
     switch_cache_db_execute_sql( dbh, sql_update, &errmsg );
 
