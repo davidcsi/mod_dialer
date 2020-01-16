@@ -25,10 +25,7 @@ You'd need to add the numbers to call to the table and configure your campaign a
 | **calling_strategy** | sequential or random |
 | **action_on_anwser** | What to do when to call connects. Default is "echo()" |
 | **transfer_on_answer** | Or transfer to this extension. Default is 8888 |
-| **finish_on** | When to end the campaign. 
-     -1: When all numbers in the destination_list have been called
-      0: Never
-      n: After making n calls |
+| **finish_on** | When to end the campaign. -1: When all numbers in the destination_list have been called. 0: Never. n: After making n calls |
 
 
 ## Gaussian Distribution
